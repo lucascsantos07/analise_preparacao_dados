@@ -93,3 +93,49 @@ def detectar_outliers_zscore(df, coluna, limite=3):
         "quantidade_outliers": len(outliers),
         "outliers": outliers
     }
+
+def verificar_valores_invalidos(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Verifica se os valores das colunas numéricas estão dentro dos limites esperados.
+    
+    - Variáveis de escala: devem estar entre 1 e 10.
+    - Variáveis de contagem/horas: não podem ser negativas (< 0).
+    
+    Returns:
+        pd.DataFrame com colunas: variavel, minimo, maximo, valores_invalidos
+    """
+    resultados = []
+
+    variaveis_escala = [
+        "mood_score",
+        "stress_level",
+        "fear_tolerance",
+        "risk_tolerance",
+        "humor_preference",
+        "openness_score",
+        "romance_interest"
+    ]
+
+    for coluna in variaveis_escala:
+        invalidos = ((df[coluna] < 1) | (df[coluna] > 10)).sum()
+        resultados.append({
+            "variavel": coluna,
+            "minimo": df[coluna].min(),
+            "maximo": df[coluna].max(),
+            "valores_invalidos": invalidos
+        })
+
+    variaveis_nao_negativas = [
+        "social_media_hours_per_day",
+        "streaming_subscription_count"
+    ]
+
+    for coluna in variaveis_nao_negativas:
+        resultados.append({
+            "variavel": coluna,
+            "minimo": df[coluna].min(),
+            "maximo": df[coluna].max(),
+            "valores_invalidos": (df[coluna] < 0).sum()
+        })
+
+    return pd.DataFrame(resultados)
